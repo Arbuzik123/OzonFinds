@@ -6,11 +6,29 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+import os
+import uuid
 def updateOzon(e, path, lock, X, Y, positions):
+    unique_id = str(uuid.uuid4())
+
+    # Задаем уникальный путь для сохранения chromedriver
+    custom_dir = f"driver"
+
+    # Создаем директорию, если она не существует
+    os.makedirs(custom_dir, exist_ok=True)
+
+    # Создаем патчер с указанием пользовательского пути для сохранения chromedriver
+    patcher = uc.Patcher(executable_path=os.path.join(custom_dir, 'chromedriver.exe'))
+    patcher.auto()  # Автоматическая настройка патчера
+
+    # Опции для Chrome
     options = webdriver.ChromeOptions()
-    options.add_argument("--user-data-dir=C:/Users/User/AppData/Local/Google/Chrome/User Data")
-    options.add_argument('--profile-directory=Profile 1')
-    driver = uc.Chrome(options=options)
+    # Используем уникальные пользовательские данные и профиль для каждого процесса
+    options.add_argument(f"--user-data-dir=C:/Users/User/AppData/Local/Google/Chrome/User Data/{unique_id}")
+    options.add_argument(f'--profile-directory=Profile_{unique_id}')
+
+    # Создание экземпляра Chrome с патчером
+    driver = uc.Chrome(options=options, patcher=patcher, driver_executable_path=fr"C:\Users\user\PycharmProjects\OzonFind\driver\chromedriver.exe")
     driver.set_window_size(X, Y)
     driver.set_window_position(*positions, windowHandle='current')
     file_path = f'{path.split("_")[0]}_{e + 1}.xlsx'
